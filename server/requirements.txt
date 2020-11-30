@@ -1,0 +1,6 @@
+uvicorn
+fastapi
+sqlalchemy
+mysqlclient
+pydantic
+pandas

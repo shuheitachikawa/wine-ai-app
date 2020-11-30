@@ -1,0 +1,43 @@
+version: '3'
+services:
+  app:
+    build: ./wine-ai-client/.
+    volumes:
+      - ./wine-ai-client/:/app
+    ports:
+      - "3000:3000"
+    tty: true
+    working_dir: /app
+    command: npm run dev
+  api:
+    build: ./server/.
+    volumes:
+      - ./server/:/app
+    ports:
+      - "8000:8000"
+    links:
+      - db
+    command: uvicorn main:app
+  db:
+    image: mysql:5.5
+    environment:
+      MYSQL_ROOT_PASSWORD: tachikawa
+      MYSQL_DATABASE: wine-ai
+      MYSQL_USER: root
+      MYSQL_PASSWORD: tachikawa
+      TZ: 'Asia/Tokyo'
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./docker/db/data:/var/lib/mysql
+      - ./docker/db/sql:/docker-entrypoint-initdb.d
+    ports:
+      - 3306:3306
+
+
+# buildで【.】を指定することで、同一ディレクトリのDockerfileを元にcontainerを作成します
+# portsでホストマシンの3000番portとコンテナの3000番portを照合します
+# volumesで、ホストマシンのカレントディレクトリをコンテナの/app似マウント
+# Dockerfileでinstallしたnode_modulesが消えないように、/app/node_modulesをホストマシンにマウントします
+# tty trueで対話モードで実行します
+# working_dirでコマンドを実行するディレクトリを指定
+# commandでコンテナが立ち上がったタイミングで、npm run dev命令を実行するように指定
